@@ -126,9 +126,17 @@ No was never an option — it was, and will always be, impossible ✨"></div>
     }
 
     // Playful runaway No button
-    const noBtn = document.getElementById('noBtn');
-    noBtn.addEventListener('mouseover', () => {
-      const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
+    document.addEventListener('DOMContentLoaded', () => {
+      const noBtn = document.getElementById('noBtn');
+      if (!noBtn) return;
+      noBtn.addEventListener('mouseover', () => {
+        const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
+        const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+        noBtn.style.position = 'fixed';
+        noBtn.style.left = x + 'px';
+        noBtn.style.top = y + 'px';
+      });
+    });
       const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
       noBtn.style.position = 'fixed';
       noBtn.style.left = x + 'px';
