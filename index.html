@@ -17,6 +17,15 @@
       text-align:center;
       overflow:hidden;
     }
+
+    /* Fireworks canvas behind everything */
+    #fx{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+    }
+
     .card{
       background: rgba(255,255,255,0.12);
       padding:40px 30px;
@@ -26,11 +35,12 @@
       z-index:2;
       backdrop-filter: blur(6px);
     }
+
     h1{font-size:2.2rem;margin:0 0 14px;}
     p{font-size:1.1rem;margin:0 0 18px;line-height:1.55;}
     .question{font-size:1.25rem;margin:0 0 18px;}
-    .btnrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
 
+    .btnrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
     button{
       border:none;
       padding:12px 22px;
@@ -42,7 +52,6 @@
     }
     #yesBtn{background:#fff;color:#ff4f7b;}
     #yesBtn:hover{transform:scale(1.06);background:#ffe6ec;}
-
     #noBtn{background:#ffd1dc;color:#ff4f7b;}
     #noBtn:hover{transform:scale(1.04);}
 
@@ -68,18 +77,27 @@
       opacity:.75;
       animation: fall linear infinite;
       pointer-events:none;
-      z-index:1;
+      z-index:1; /* behind card, above fireworks */
     }
     @keyframes fall{
       to { transform: translateY(110vh) rotate(360deg); }
+    }
+
+    .hint{
+      display:none;
+      margin-top:10px;
+      font-size:0.95rem;
+      opacity:0.9;
     }
   </style>
 </head>
 <body>
 
+  <canvas id="fx"></canvas>
+
   <!-- Music (starts only when YES is clicked) -->
-  <audio id="bg-music" loop preload="auto">
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7c8c3b1f6e.mp3" type="audio/mpeg">
+  <audio id="bg-music" loop preload="auto" playsinline crossorigin="anonymous">
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7c8c3b1f6e.mp3?filename=beautiful-piano-ambient-11259.mp3" type="audio/mpeg">
   </audio>
 
   <div class="card">
@@ -98,6 +116,8 @@
       <button id="noBtn">No 🙈</button>
     </div>
 
+    <div id="musicHint" class="hint">Tap “Yes 💖” once more to start the music 🎶</div>
+
     <div id="response" class="letter"
       data-text="💖 My love Vinnuuu 💖 From our first meeting on February 21, you became a part of me in ways words can barely hold. If I have ever hurt you—know that it was never my intention, and I am truly sorry from the depths of my heart. I promise to love you more gently, listen more deeply, and cherish you more completely every single day. No was never an option — it was, and will always be, impossible ✨">
     </div>
@@ -109,7 +129,9 @@
       const noBtn = document.getElementById('noBtn');
       const response = document.getElementById('response');
       const music = document.getElementById('bg-music');
+      const hint = document.getElementById('musicHint');
 
+      /* ---------- Typewriter + Fade + Petals ---------- */
       function startPetals(count = 26) {
         for (let j = 0; j < count; j++) {
           const petal = document.createElement('div');
@@ -117,13 +139,14 @@
           petal.style.left = Math.random() * 100 + 'vw';
           petal.style.animationDuration = (6 + Math.random() * 6) + 's';
           petal.style.opacity = (0.35 + Math.random() * 0.55);
-          petal.style.width = (14 + Math.random() * 10) + 'px';
-          petal.style.height = petal.style.width;
+          const s = 14 + Math.random() * 10;
+          petal.style.width = s + 'px';
+          petal.style.height = s + 'px';
           document.body.appendChild(petal);
         }
       }
 
-      function typewriter(el, text, speed = 38) {
+      function typewriter(el, text, speed = 34) {
         el.innerHTML = '';
         let i = 0;
         const timer = setInterval(() => {
@@ -133,37 +156,221 @@
         }, speed);
       }
 
-      yesBtn.addEventListener('click', () => {
-        // show + fade
-        response.style.display = 'block';
-        setTimeout(() => response.classList.add('fade-in'), 80);
-
-        // type text
-        const text = response.getAttribute('data-text') || '';
-        typewriter(response, text);
-
-        // start music (browser allows after click)
+      async function startMusic() {
         try {
           music.volume = 0.25;
-          music.play();
-        } catch (e) {}
+          const p = music.play();
+          if (p && typeof p.then === 'function') await p;
+          hint.style.display = 'none';
+          return true;
+        } catch (e) {
+          hint.style.display = 'block';
+          return false;
+        }
+      }
 
-        // petals
-        startPetals();
+      /* ---------- Fireworks (background) ---------- */
+      const canvas = document.getElementById('fx');
+      const ctx = canvas.getContext('2d');
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      let fireworksOn = false;
+      const gravity = 0.06;
+      const particles = [];
+      const rockets = [];
+
+      function rand(min, max) { return Math.random() * (max - min) + min; }
+
+      // Offscreen text map for VINNU
+      let textPoints = [];
+      function buildTextPoints(word = 'VINNU') {
+        const off = document.createElement('canvas');
+        const octx = off.getContext('2d');
+        off.width = Math.min(900, Math.floor(window.innerWidth * 0.9));
+        off.height = Math.min(300, Math.floor(window.innerHeight * 0.35));
+
+        octx.clearRect(0, 0, off.width, off.height);
+        const fontSize = Math.floor(off.height * 0.7);
+        octx.font = `900 ${fontSize}px Segoe UI, Arial, sans-serif`;
+        octx.textAlign = 'center';
+        octx.textBaseline = 'middle';
+        octx.fillStyle = '#ffffff';
+        octx.fillText(word, off.width / 2, off.height / 2);
+
+        const img = octx.getImageData(0, 0, off.width, off.height).data;
+        const step = Math.max(5, Math.floor(off.width / 140)); // controls density
+        const pts = [];
+        for (let y = 0; y < off.height; y += step) {
+          for (let x = 0; x < off.width; x += step) {
+            const idx = (y * off.width + x) * 4;
+            if (img[idx + 3] > 160) {
+              const mx = (canvas.width - off.width) / 2 + x;
+              const my = (canvas.height * 0.18) + y;
+              pts.push({ x: mx, y: my });
+            }
+          }
+        }
+        textPoints = pts;
+      }
+
+      function spawnRocket() {
+        const startX = rand(0.2, 0.8) * canvas.width;
+        const startY = canvas.height + 10;
+        const targetY = rand(0.2, 0.45) * canvas.height;
+        rockets.push({ x: startX, y: startY, vx: rand(-0.7, 0.7), vy: rand(-6.5, -4.8), targetY, life: 0 });
+      }
+
+      function explode(x, y) {
+        const count = Math.floor(rand(28, 48));
+        for (let i = 0; i < count; i++) {
+          const a = (Math.PI * 2) * (i / count);
+          const speed = rand(1.2, 3.4);
+          particles.push({
+            x, y,
+            vx: Math.cos(a) * speed * rand(0.6, 1.2),
+            vy: Math.sin(a) * speed * rand(0.6, 1.2),
+            alpha: 1,
+            decay: rand(0.008, 0.018),
+            size: rand(1.2, 2.4),
+            toText: false
+          });
+        }
+      }
+
+      // Special: burst into VINNU text using point targets
+      function burstText(word = 'VINNU') {
+        buildTextPoints(word);
+        if (!textPoints.length) return;
+
+        const burstCount = Math.min(1100, textPoints.length);
+        const used = new Set();
+
+        for (let i = 0; i < burstCount; i++) {
+          let idx = Math.floor(Math.random() * textPoints.length);
+          let tries = 0;
+          while (used.has(idx) && tries < 6) { idx = Math.floor(Math.random() * textPoints.length); tries++; }
+          used.add(idx);
+
+          const t = textPoints[idx];
+          const startX = rand(0.1, 0.9) * canvas.width;
+          const startY = canvas.height + rand(0, 80);
+
+          const dx = t.x - startX;
+          const dy = t.y - startY;
+          const T = rand(45, 75);
+
+          particles.push({
+            x: startX, y: startY,
+            vx: dx / T,
+            vy: dy / T,
+            alpha: 1,
+            decay: rand(0.0035, 0.0075),
+            size: rand(1.2, 2.1),
+            toText: true,
+            damp: 0.985
+          });
+        }
+
+        setTimeout(() => {
+          for (let k = 0; k < 3; k++) {
+            explode(rand(0.25, 0.75) * canvas.width, rand(0.15, 0.35) * canvas.height);
+          }
+        }, 1400);
+      }
+
+      function step() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = 'rgba(0,0,0,0.18)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (fireworksOn && Math.random() < 0.035) spawnRocket();
+
+        for (let i = rockets.length - 1; i >= 0; i--) {
+          const r = rockets[i];
+          r.life++;
+          r.x += r.vx;
+          r.y += r.vy;
+          r.vy += gravity * 0.35;
+
+          ctx.beginPath();
+          ctx.fillStyle = 'rgba(255,255,255,0.8)';
+          ctx.arc(r.x, r.y, 1.6, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (r.y <= r.targetY || r.life > 240) {
+            explode(r.x, r.y);
+            rockets.splice(i, 1);
+          }
+        }
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (!p.toText) p.vy += gravity;
+          else { p.vx *= p.damp; p.vy *= p.damp; }
+
+          p.alpha -= p.decay;
+          if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+
+          ctx.beginPath();
+          ctx.fillStyle = p.toText
+            ? `rgba(255, 215, 235, ${Math.min(1, p.alpha)})`
+            : `rgba(255, 180, 210, ${Math.min(1, p.alpha)})`;
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      ctx.fillStyle = 'rgba(0,0,0,1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      requestAnimationFrame(step);
+
+      /* ---------- Button behaviors ---------- */
+      let effectsStarted = false;
+
+      yesBtn.addEventListener('click', async () => {
+        if (!effectsStarted) {
+          effectsStarted = true;
+
+          response.style.display = 'block';
+          setTimeout(() => response.classList.add('fade-in'), 80);
+
+          const text = response.getAttribute('data-text') || '';
+          typewriter(response, text, 34);
+
+          startPetals(28);
+
+          fireworksOn = true;
+          burstText('VINNU');
+        }
+
+        await startMusic();
       });
 
-      // Playful runaway NO button
-      const moveNo = () => {
+      // runaway NO
+      function moveNo() {
         const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
         const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
         noBtn.style.position = 'fixed';
         noBtn.style.left = x + 'px';
         noBtn.style.top = y + 'px';
-      };
+        noBtn.style.zIndex = 3;
+      }
 
       noBtn.addEventListener('mouseover', moveNo);
-      noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveNo(); });
       noBtn.addEventListener('click', (e) => { e.preventDefault(); moveNo(); });
+      noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveNo(); }, { passive:false });
     });
   </script>
 </body>
