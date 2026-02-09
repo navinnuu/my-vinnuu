@@ -27,8 +27,10 @@
       backdrop-filter: blur(6px);
     }
     h1{font-size:2.2rem;margin:0 0 14px;}
-    p{font-size:1.1rem;margin:0 0 26px;line-height:1.55;}
+    p{font-size:1.1rem;margin:0 0 18px;line-height:1.55;}
+    .question{font-size:1.25rem;margin:0 0 18px;}
     .btnrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
     button{
       border:none;
       padding:12px 22px;
@@ -40,8 +42,10 @@
     }
     #yesBtn{background:#fff;color:#ff4f7b;}
     #yesBtn:hover{transform:scale(1.06);background:#ffe6ec;}
+
     #noBtn{background:#ffd1dc;color:#ff4f7b;}
     #noBtn:hover{transform:scale(1.04);}
+
     .letter{
       display:none;
       margin-top:18px;
@@ -73,18 +77,21 @@
 </head>
 <body>
 
-  <!-- Music (starts when love letter opens on YES) -->
+  <!-- Music (starts only when YES is clicked) -->
   <audio id="bg-music" loop preload="auto">
     <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7c8c3b1f6e.mp3" type="audio/mpeg">
   </audio>
 
   <div class="card">
     <h1>My Vinnuuuu ❤️</h1>
+
     <p>
       From the moment I met you on <strong>February 21</strong>, my world quietly found its meaning.
       Every smile of yours, every shared silence, every little moment since then has woven itself into my heart.
       You are my safest place, my greatest blessing, my forever.
     </p>
+
+    <p class="question">Will you be my Valentine? 💖</p>
 
     <div class="btnrow">
       <button id="yesBtn">Yes 💖</button>
@@ -92,8 +99,7 @@
     </div>
 
     <div id="response" class="letter"
-      data-text="💖 My love Vinnuuu 💖 From our first meeting on February 21, you became a part of me in ways words can barely hold. If I have ever hurt you—know that it was never my intention, and I am truly sorry from the depths of my heart. I promise to love you more gently, listen more deeply, and cherish you more completely every single day. No was never an option — it was, and will always be, impossible ✨"
->
+      data-text="💖 My love Vinnuuu 💖 From our first meeting on February 21, you became a part of me in ways words can barely hold. If I have ever hurt you—know that it was never my intention, and I am truly sorry from the depths of my heart. I promise to love you more gently, listen more deeply, and cherish you more completely every single day. No was never an option — it was, and will always be, impossible ✨">
     </div>
   </div>
 
@@ -121,8 +127,7 @@
         el.innerHTML = '';
         let i = 0;
         const timer = setInterval(() => {
-          const ch = text.charAt(i);
-          el.innerHTML += (ch === '\n') ? '<br>' : ch;
+          el.innerHTML += text.charAt(i);
           i++;
           if (i >= text.length) clearInterval(timer);
         }, speed);
@@ -137,7 +142,7 @@
         const text = response.getAttribute('data-text') || '';
         typewriter(response, text);
 
-        // start music (browser allowed after click)
+        // start music (browser allows after click)
         try {
           music.volume = 0.25;
           music.play();
