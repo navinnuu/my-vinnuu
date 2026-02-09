@@ -5,142 +5,159 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Be My Valentine ❤️</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
+    body{
+      margin:0;
+      font-family:'Segoe UI',sans-serif;
       background: radial-gradient(circle at top, #1a1a2e, #16213e, #0f3460);
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
-      text-align: center;
-      overflow: hidden;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      color:#fff;
+      text-align:center;
+      overflow:hidden;
     }
-    .card {
-      background: rgba(255, 255, 255, 0.15);
-      padding: 40px 30px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      max-width: 420px;
-      z-index: 2;
+    .card{
+      background: rgba(255,255,255,0.12);
+      padding:40px 30px;
+      border-radius:20px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.25);
+      max-width:460px;
+      z-index:2;
+      backdrop-filter: blur(6px);
     }
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 15px;
+    h1{font-size:2.2rem;margin:0 0 14px;}
+    p{font-size:1.1rem;margin:0 0 26px;line-height:1.55;}
+    .btnrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+    button{
+      border:none;
+      padding:12px 22px;
+      font-size:1rem;
+      border-radius:999px;
+      cursor:pointer;
+      transition: transform .18s ease, background .18s ease;
+      user-select:none;
     }
-    p {
-      font-size: 1.1rem;
-      margin-bottom: 30px;
-    }
-    button {
-      background: #fff;
-      color: #ff4f7b;
-      border: none;
-      padding: 12px 25px;
-      font-size: 1rem;
-      border-radius: 25px;
-      cursor: pointer;
-      transition: transform 0.2s ease, background 0.2s ease;
-    }
-    button:hover {
-      transform: scale(1.05);
-      background: #ffe6ec;
-    }
-    .hidden {
-      display: none;
-      margin-top: 20px;
-      font-size: 1.15rem;
-      line-height: 1.6;
-      opacity: 0;
+    #yesBtn{background:#fff;color:#ff4f7b;}
+    #yesBtn:hover{transform:scale(1.06);background:#ffe6ec;}
+    #noBtn{background:#ffd1dc;color:#ff4f7b;}
+    #noBtn:hover{transform:scale(1.04);}
+    .letter{
+      display:none;
+      margin-top:18px;
+      font-size:1.12rem;
+      line-height:1.65;
+      opacity:0;
       transition: opacity 2s ease;
     }
-    .fade-in {
-      opacity: 1;
-    }
+    .fade-in{opacity:1;}
+
     /* Falling rose petals */
-    .petal {
-      position: absolute;
-      top: -50px;
-      width: 20px;
-      height: 20px;
+    .petal{
+      position:absolute;
+      top:-50px;
+      width:18px;
+      height:18px;
       background: radial-gradient(circle at 30% 30%, #ffb6c1, #ff4f7b);
-      border-radius: 50% 50% 50% 0;
+      border-radius:50% 50% 50% 0;
       transform: rotate(45deg);
-      opacity: 0.8;
+      opacity:.75;
       animation: fall linear infinite;
+      pointer-events:none;
+      z-index:1;
     }
-    @keyframes fall {
-      to {
-        transform: translateY(110vh) rotate(360deg);
-      }
+    @keyframes fall{
+      to { transform: translateY(110vh) rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <audio id="bg-music" loop>
+
+  <!-- Music (starts when love letter opens on YES) -->
+  <audio id="bg-music" loop preload="auto">
     <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7c8c3b1f6e.mp3" type="audio/mpeg">
   </audio>
 
   <div class="card">
     <h1>My Vinnuuuu ❤️</h1>
-    <p>From the moment I met you on <strong>February 21</strong>, my world quietly found its meaning. Every smile of yours, every shared silence, every little moment since then has woven itself into my heart. You are my safest place, my greatest blessing, my forever.</p>
-    <button onclick="showMessage()" id="yesBtn">Yes 💖</button>
-    <button id="noBtn" style="margin-left:12px; background:#ffd1dc; color:#ff4f7b;">No 🙈</button>
-    <div id="response" class="hidden" data-text="💌 This is my love letter to you, Vinnuuuu 💌
+    <p>
+      From the moment I met you on <strong>February 21</strong>, my world quietly found its meaning.
+      Every smile of yours, every shared silence, every little moment since then has woven itself into my heart.
+      You are my safest place, my greatest blessing, my forever.
+    </p>
 
-From our first meeting on February 21, you became a part of me in ways words can barely hold. If I have ever hurt you—know that it was never my intention, and I am truly sorry from the depths of my heart. I promise to love you more gently, listen more deeply, and cherish you more completely every single day.
+    <div class="btnrow">
+      <button id="yesBtn">Yes 💖</button>
+      <button id="noBtn">No 🙈</button>
+    </div>
 
-No was never an option — it was, and will always be, impossible ✨"></div>
+    <div id="response" class="letter"
+      data-text="💌 This is my love letter to you, Vinnuuuu 💌\n\nFrom our first meeting on February 21, you became a part of me in ways words can barely hold. If I have ever hurt you—know that it was never my intention, and I am truly sorry from the depths of my heart. I promise to love you more gently, listen more deeply, and cherish you more completely every single day.\n\nNo was never an option — it was, and will always be, impossible ✨">
+    </div>
   </div>
 
   <script>
-    function showMessage() {
+    document.addEventListener('DOMContentLoaded', () => {
+      const yesBtn = document.getElementById('yesBtn');
+      const noBtn = document.getElementById('noBtn');
       const response = document.getElementById('response');
       const music = document.getElementById('bg-music');
-      const text = response.getAttribute('data-text');
 
-      response.innerHTML = '';
-      response.style.display = 'block';
-      setTimeout(() => response.classList.add('fade-in'), 100);
-
-      music.volume = 0.25;
-      music.play();
-
-      let i = 0;
-      const typing = setInterval(() => {
-        response.innerHTML += text.charAt(i) === '
-' ? '<br>' : text.charAt(i);
-        i++;
-        if (i >= text.length) clearInterval(typing);
-      }, 40);
-
-      for (let j = 0; j < 25; j++) {
-        const petal = document.createElement('div');
-        petal.className = 'petal';
-        petal.style.left = Math.random() * 100 + 'vw';
-        petal.style.animationDuration = 6 + Math.random() * 6 + 's';
-        petal.style.opacity = Math.random();
-        document.body.appendChild(petal);
+      function startPetals(count = 26) {
+        for (let j = 0; j < count; j++) {
+          const petal = document.createElement('div');
+          petal.className = 'petal';
+          petal.style.left = Math.random() * 100 + 'vw';
+          petal.style.animationDuration = (6 + Math.random() * 6) + 's';
+          petal.style.opacity = (0.35 + Math.random() * 0.55);
+          petal.style.width = (14 + Math.random() * 10) + 'px';
+          petal.style.height = petal.style.width;
+          document.body.appendChild(petal);
+        }
       }
-    }
 
-    // Playful runaway No button
-    document.addEventListener('DOMContentLoaded', () => {
-      const noBtn = document.getElementById('noBtn');
-      if (!noBtn) return;
-      noBtn.addEventListener('mouseover', () => {
+      function typewriter(el, text, speed = 38) {
+        el.innerHTML = '';
+        let i = 0;
+        const timer = setInterval(() => {
+          const ch = text.charAt(i);
+          el.innerHTML += (ch === '\n') ? '<br>' : ch;
+          i++;
+          if (i >= text.length) clearInterval(timer);
+        }, speed);
+      }
+
+      yesBtn.addEventListener('click', () => {
+        // show + fade
+        response.style.display = 'block';
+        setTimeout(() => response.classList.add('fade-in'), 80);
+
+        // type text
+        const text = response.getAttribute('data-text') || '';
+        typewriter(response, text);
+
+        // start music (browser allowed after click)
+        try {
+          music.volume = 0.25;
+          music.play();
+        } catch (e) {}
+
+        // petals
+        startPetals();
+      });
+
+      // Playful runaway NO button
+      const moveNo = () => {
         const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
         const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
         noBtn.style.position = 'fixed';
         noBtn.style.left = x + 'px';
         noBtn.style.top = y + 'px';
-      });
-    });
-      const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
-      noBtn.style.position = 'fixed';
-      noBtn.style.left = x + 'px';
-      noBtn.style.top = y + 'px';
+      };
+
+      noBtn.addEventListener('mouseover', moveNo);
+      noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveNo(); });
+      noBtn.addEventListener('click', (e) => { e.preventDefault(); moveNo(); });
     });
   </script>
 </body>
